@@ -7,7 +7,7 @@ set -euo pipefail
 PIN=6ef358a962bb219c506479ffa6c828979cfb3903   # WabiSabi 1.3.0 (repository commit in the nuspec)
 
 if [ ! -d NWabiSabi ]; then
-  git clone https://github.com/zkSNACKs/NWabiSabi NWabiSabi
+  git clone https://github.com/WalletWasabi/NWabiSabi NWabiSabi
 fi
 ( cd NWabiSabi && git checkout -q "$PIN" )
 

@@ -2,7 +2,7 @@
 
 A dropped presentation-count guard in `WabiSabi.Native.CredentialIssuer` (the native KVAC
 issuer shipped in the `WabiSabi` 1.3.0 NuGet package, source
-[zkSNACKs/NWabiSabi](https://github.com/zkSNACKs/NWabiSabi)), wired into the WalletWasabi
+[WalletWasabi/NWabiSabi](https://github.com/WalletWasabi/NWabiSabi)), wired into the WalletWasabi
 coordinator by commit `f8e1d4d` ("Make coordinator use the native WabiSabi").
 
 ## The regression
@@ -48,7 +48,7 @@ dotnet run --project Poc -c Release
 
 Requires the .NET 10 SDK and Linux x64 (the fetched native binary is `linux-x64`).
 
-## Fix (upstream: zkSNACKs/NWabiSabi)
+## Fix (upstream: WalletWasabi/NWabiSabi)
 
 1. Restore the count guards in `WabiSabi.Native.CredentialIssuer.HandleRequest`, mirroring
    managed `CredentialIssuer.cs:118-134`: reject `Presented.Count != 2` for a non-null request

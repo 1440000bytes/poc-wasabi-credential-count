@@ -1,6 +1,6 @@
 /*
- * PoC: dropped presentation-count guard in WabiSabi.Native.CredentialIssuer (v1.3.0),
- * wired into the WalletWasabi coordinator by commit f8e1d4d (Round.cs:
+ * PoC: dropped presentation-count guard in WabiSabi.Native.CredentialIssuer (WabiSabi 1.2.0 at
+ * f8e1d4d, 1.3.0 on current master), wired into the WalletWasabi coordinator (Round.cs:
  * `using CredentialIssuer = WabiSabi.Native.CredentialIssuer`).
  *
  * The audited managed issuer (WabiSabi.Crypto.CredentialIssuer, lines 127-134) rejects any
@@ -79,9 +79,11 @@ class Poc
         Console.WriteLine("  offsets regardless of how many were declared, and builds 2 show-statements:");
         Console.WriteLine("    c/src/ffi.c:548   for (i=0; i<WABISABI_CREDENTIAL_COUNT; i++) read_presentation(...)");
         Console.WriteLine("    c/src/issuer.c:141 for (i=0; i<WABISABI_CREDENTIAL_COUNT; i++) show_credential_statement");
-        Console.WriteLine("  Corroboration: with Presented.Count=1 the native rejection is a PARSE error (code 3)");
-        Console.WriteLine("  on presented[1] -- proving it tried to read a 2nd presentation from bytes the");
-        Console.WriteLine("  declared request did not intend as one (managed rejected the same input on count).");
+        Console.WriteLine("  Corroboration: with Presented.Count=1 the native issuer rejects inside the C");
+        Console.WriteLine("  parser/verifier on presented[1] (the exact code is printed for count=1 above; it is");
+        Console.WriteLine("  a parse or invalid-proof rejection depending on the bytes, never a count check),");
+        Console.WriteLine("  proving it read a 2nd presentation from bytes the declared request did not intend as");
+        Console.WriteLine("  one. The managed issuer rejected the same input on the count.");
 
         // ===== CLAIM 3: the wrapper records serials only for declared presentations =
         Console.WriteLine("\nCLAIM 3 [CODE-PROVEN mechanism]: double-spend prevention is the wrapper's job");
