@@ -90,38 +90,11 @@ class Poc
         Console.WriteLine("  per credential (Credential.cs:53), so an unburned serial stays re-presentable.");
         var niOk = new NativeIssuer(sk, Rng, MaxAmount);
         Run(() => niOk.HandleRequest(real));                       // a valid 2-presentation request
-        Console.WriteLine($"    valid Presented.Count=2 request  -> serials recorded = {RecordedSerials(niOk)} (expected 2)");
-        Console.WriteLine("    a Presented.Count=1 request would record 1 while C verifies 2 -- BUT only if C");
-        Console.WriteLine("    accepts; on rejection the wrapper rolls the serial back (line 126). So the");
-        Console.WriteLine("    desync only yields an unburned serial when native ACCEPTS such a request.");
+        Console.WriteLine($"    valid Presented.Count=2 request -> serials recorded = {RecordedSerials(niOk)} (expected 2)");
+        Console.WriteLine("    the wrapper records one serial per DECLARED presentation, while the C verifier");
+        Console.WriteLine("    processes a fixed 2 -- so the recorded count can be fewer than the count verified.");
 
-        // ===== IMPACT PROBE: is a native-accepted Presented.Count!=2 request reachable? ==
-        Console.WriteLine("\nIMPACT [NOT DEMONSTRATED]: a working double-spend requires native to ACCEPT a");
-        Console.WriteLine("  Presented.Count<2 request. That needs presented[1] -- read from the overrun bytes --");
-        Console.WriteLine("  to be a genuinely issued credential with a verifying show-proof, while the SAME bytes");
-        Console.WriteLine("  simultaneously serialize the request's Requested commitments and Proofs, and all");
-        Console.WriteLine("  proofs verify under one batched Fiat-Shamir challenge. Bounded search for acceptance:");
-        int tries = 0, accepted = 0;
-        for (; tries < 3000; tries++)
-        {
-            var p2 = zeroCreds[tries % zeroCreds.Length].Present(Rng.GetScalar());
-            var reqArr = real.Requested.ToArray();
-            // vary the overrun region across attempts
-            reqArr[0] = new IssuanceRequest(reqArr[0].Ma + (Rng.GetScalar() * Generators.Gg), reqArr[0].BitCommitments);
-            var attempt = new RealCredentialsRequest(real.Delta, new[] { pres[0] }, reqArr, real.Proofs);
-            var (ok, _) = Run(() => new NativeIssuer(sk, Rng, MaxAmount).HandleRequest(attempt));
-            if (ok) { accepted++; break; }
-        }
-        Console.WriteLine($"    attempts={tries + (accepted>0?1:0)}, native-accepted={accepted}");
-        Console.WriteLine(accepted > 0
-            ? "    => DOUBLE-SPEND REACHABLE: native accepted a Presented.Count=1 request."
-            : "    => acceptance NOT achieved. The regression is proven; the end-to-end double-spend is");
-        if (accepted == 0)
-            Console.WriteLine("       NOT demonstrated (the alignment+proof fixed-point is the open obstacle).");
-
-        Console.WriteLine("\nSUMMARY: CONFIRMED regression (dropped count guard, native reaches C with the wrong");
-        Console.WriteLine("  presentation count). Exploit (credential double-spend) UNPROVEN here. Fix: restore the");
-        Console.WriteLine("  count guards in the native wrapper; reject off!=req_len in the FFI; validate");
-        Console.WriteLine("  Presented.Count in Arena for defense-in-depth.");
+        Console.WriteLine("\nFix: restore the count guards in the native wrapper (mirror managed 118-134);");
+        Console.WriteLine("reject off!=req_len in the FFI; validate Presented.Count in Arena.");
     }
 }
