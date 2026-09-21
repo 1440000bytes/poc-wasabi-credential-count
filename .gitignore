@@ -1,0 +1,5 @@
+NWabiSabi/
+bin/
+obj/
+*.user
+wabisabi.*.nupkg
